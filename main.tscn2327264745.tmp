@@ -6,11 +6,8 @@
 [ext_resource type="Material" uid="uid://bb43ngplsfis2" path="res://addons/flexible_toon_shader/FlexibleToonMaterial.tres" id="3_272bh"]
 [ext_resource type="Shader" uid="uid://b4gs1llabra6d" path="res://outline.gdshader" id="3_gtvun"]
 [ext_resource type="Texture2D" uid="uid://chi17fb3dyt6b" path="res://icon.svg" id="4_iowfd"]
-[ext_resource type="PackedScene" uid="uid://16mve0eulikf" path="res://models/lpgirl.tscn" id="8_5vw27"]
-[ext_resource type="PackedScene" uid="uid://r0fbpgakvp8w" path="res://models/animate_man.tscn" id="8_kek77"]
-[ext_resource type="Script" uid="uid://cbkvhk2grxr6" path="res://scripts/animate_man.gd" id="9_4c57u"]
-[ext_resource type="PackedScene" uid="uid://gmwnyqufw2td" path="res://models/alex_a.glb" id="10_efxa6"]
-[ext_resource type="Script" uid="uid://ddxq1xkhmpb36" path="res://scripts/alex_a.gd" id="11_dg77c"]
+[ext_resource type="PackedScene" uid="uid://vyw8hcr66eit" path="res://models/lpgirl.glb" id="6_5vw27"]
+[ext_resource type="PackedScene" uid="uid://dgvubh3u0t1rx" path="res://cars_1.tscn" id="7_5vw27"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_andoa"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -58,6 +55,15 @@ albedo_color = Color(0.301961, 0.607843, 0.901961, 1)
 [sub_resource type="PrismMesh" id="PrismMesh_ebc50"]
 material = SubResource("StandardMaterial3D_4irvy")
 
+[sub_resource type="GDScript" id="GDScript_kek77"]
+script/source = "extends Node3D
+func _ready():
+	var anim_player = $AnimationPlayer
+	anim_player.play(\"run\")  
+	anim_player.playback_speed = 2.0      
+	anim_player.get_animation(\"run\")
+"
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_i6itp"]
 render_priority = 0
 shader = ExtResource("3_gtvun")
@@ -67,21 +73,126 @@ shader_parameter/normal_threshold = 0.6
 shader_parameter/darken_amount = 0.2
 shader_parameter/lighten_amount = 1.5
 shader_parameter/normal_edge_bias = Vector3(-1, -1, -1)
-shader_parameter/light_direction = Vector3(-0.64638, -0.440673, 0.622896)
+shader_parameter/light_direction = Vector3(-0.425645, -0.440907, 0.790207)
 
 [sub_resource type="QuadMesh" id="QuadMesh_egxnj"]
 material = SubResource("ShaderMaterial_i6itp")
 flip_faces = true
 size = Vector2(2, 2)
 
-[sub_resource type="GDScript" id="GDScript_5vw27"]
-script/source = "extends Node3D
-func _ready():
-	var anim_player = $AnimationPlayer
-	anim_player.play(\"run\")  
-	anim_player.speed_scale = 2.0      
-	anim_player.get_animation(\"run\").loop_mode = Animation.LOOP_LINEAR
-"
+[sub_resource type="Shader" id="Shader_lquwl"]
+code = "shader_type spatial;
+
+//render_mode ambient_light_disabled;
+
+const float PI = 3.1415926536f;
+
+uniform vec4 albedo : hint_color = vec4(1.0f);
+uniform sampler2D albedo_texture : hint_albedo;
+uniform bool clamp_diffuse_to_max = false;
+
+uniform int cuts : hint_range(1, 8) = 3;
+uniform float wrap : hint_range(-2.0f, 2.0f) = 0.0f;
+uniform float steepness : hint_range(1.0f, 8.0f) = 1.0f;
+
+uniform bool use_attenuation = true;
+
+uniform bool use_specular = true;
+uniform float specular_strength : hint_range(0.0f, 1.0f) = 1.0f;
+uniform float specular_shininess : hint_range(0.0f, 32.0f) = 16.0f;
+uniform sampler2D specular_map : hint_albedo;
+
+uniform bool use_rim = true;
+uniform float rim_width : hint_range(0.0f, 16.0f) = 8.0f;
+uniform vec4 rim_color : hint_color = vec4(1.0f);
+
+uniform bool use_ramp = false;
+uniform sampler2D ramp : hint_albedo;
+
+uniform bool use_borders = false;
+uniform float border_width = 0.01f;
+
+varying vec3 vertex_pos;
+varying vec3 normal;
+
+float split_specular(float specular) {
+	return step(0.5f, specular);
+}
+
+void vertex() {
+	vertex_pos = VERTEX;
+	normal = NORMAL;
+}
+
+void fragment() {
+	ALBEDO = albedo.rgb * texture(albedo_texture, UV).rgb;
+}
+
+void light() {
+	// Attenuation.
+	float attenuation = 1.0f;
+	if (use_attenuation) {
+		attenuation = ATTENUATION.x;
+	}
+	
+	// Diffuse lighting.
+	float NdotL = dot(NORMAL, LIGHT);
+	float diffuse_amount = NdotL + (attenuation - 1.0) + wrap;
+	//float diffuse_amount = NdotL * attenuation + wrap;
+	diffuse_amount *= steepness;
+	float cuts_inv = 1.0f / float(cuts);
+	float diffuse_stepped = clamp(diffuse_amount + mod(1.0f - diffuse_amount, cuts_inv), 0.0f, 1.0f);
+
+	// Calculate borders.
+	float border = 0.0f;
+	if (use_borders) {
+		float corr_border_width = length(cross(NORMAL, LIGHT)) * border_width * steepness;
+		border = step(diffuse_stepped - corr_border_width, diffuse_amount)
+				 - step(1.0 - corr_border_width, diffuse_amount);
+	}
+	
+	// Apply diffuse result to different styles.
+	vec3 diffuse = ALBEDO.rgb * LIGHT_COLOR / PI;
+	if (use_ramp) {
+		diffuse *= texture(ramp, vec2(diffuse_stepped * (1.0f - border), 0.0f)).rgb;
+	} else {
+		diffuse *= diffuse_stepped * (1.0f - border);
+	}
+	
+	if (clamp_diffuse_to_max) {
+		// Clamp diffuse to max for multiple light sources.
+		DIFFUSE_LIGHT = max(DIFFUSE_LIGHT, diffuse);
+	} else {
+		DIFFUSE_LIGHT += diffuse;
+	}
+	
+	// Specular lighting.
+	if (use_specular) {
+		vec3 H = normalize(LIGHT + VIEW);
+		float NdotH = dot(NORMAL, H);
+		float specular_amount = max(pow(NdotH, specular_shininess*specular_shininess), 0.0f)
+							    * texture(specular_map, UV).r
+								* attenuation;
+		specular_amount = split_specular(specular_amount);
+		SPECULAR_LIGHT += specular_strength * specular_amount * LIGHT_COLOR;
+	}
+	
+	// Simple rim lighting.
+	if (use_rim) {
+		float NdotV = dot(NORMAL, VIEW);
+		float rim_light = pow(1.0 - NdotV, rim_width);
+		DIFFUSE_LIGHT += rim_light * rim_color.rgb * rim_color.a * LIGHT_COLOR / PI;
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_272bh"]
+render_priority = 0
+shader = SubResource("Shader_lquwl")
+
+[sub_resource type="QuadMesh" id="QuadMesh_5vw27"]
+material = SubResource("ShaderMaterial_272bh")
+flip_faces = true
+size = Vector2(2, 2)
 
 [node name="Main" type="Node3D"]
 
@@ -93,11 +204,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 stretch = true
-stretch_shrink = 7
+stretch_shrink = 5
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(274, 154)
+size = Vector2i(384, 216)
 render_target_update_mode = 4
 
 [node name="Level" type="Node3D" parent="SubViewportContainer/SubViewport"]
@@ -129,7 +240,7 @@ mesh = SubResource("BoxMesh_8smba")
 skeleton = NodePath("../../../..")
 
 [node name="Node3D" type="Node3D" parent="SubViewportContainer/SubViewport/Level"]
-transform = Transform3D(-0.683796, -0.316391, 0.635993, 0, 0.895055, 0.443336, -0.709577, 0.304895, -0.612911, 0, 10, 0)
+transform = Transform3D(-0.868167, -0.208508, 0.419133, 0, 0.895055, 0.443336, -0.467638, 0.387096, -0.778161, 0, 10, 0)
 script = ExtResource("2_7luwn")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport/Level/Node3D"]
@@ -143,7 +254,7 @@ mesh = SubResource("CylinderMesh_x030n")
 surface_material_override/0 = ExtResource("3_272bh")
 
 [node name="icosphere" parent="SubViewportContainer/SubViewport/Level/Cylinder" instance=ExtResource("1_c7amy")]
-transform = Transform3D(0.402724, 0, -0.277439, 0, 0.5, 0, 0.277439, 0, 0.402724, 0, 1.75302, 0)
+transform = Transform3D(0.29916, 0, -0.387259, 0, 0.5, 0, 0.387259, 0, 0.29916, 0, 1.75302, 0)
 script = ExtResource("2_7luwn")
 speed = -0.5
 
@@ -172,6 +283,10 @@ texture_filter = 0
 render_priority = 1
 texture = ExtResource("4_iowfd")
 
+[node name="lpgirl" parent="SubViewportContainer/SubViewport/Level" instance=ExtResource("6_5vw27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.02857, 0, 1.65241)
+script = SubResource("GDScript_kek77")
+
 [node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport"]
 transform = Transform3D(0.582154, -0.303241, 0.754415, 0, 0.92785, 0.372954, -0.813079, -0.217117, 0.540151, 7.40855, 3.6625, 5.30444)
 projection = 1
@@ -186,17 +301,15 @@ extra_cull_margin = 16384.0
 mesh = SubResource("QuadMesh_egxnj")
 skeleton = NodePath("../..")
 
-[node name="animate_man" parent="." instance=ExtResource("8_kek77")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6094, 0, 1.03549)
-script = ExtResource("9_4c57u")
-
-[node name="lpgirl" parent="." instance=ExtResource("8_5vw27")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.87712, 0, 1.06873)
+[node name="PostProcessing2" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/Camera3D"]
+unique_name_in_owner = true
+transform = Transform3D(0.582154, 0, -0.813079, -0.303241, 0.92785, -0.217117, 0.754415, 0.372954, 0.540151, 1.43051e-06, 7.27177e-06, -11.3814)
 visible = false
-script = SubResource("GDScript_5vw27")
+extra_cull_margin = 16384.0
+mesh = SubResource("QuadMesh_5vw27")
+skeleton = NodePath("../..")
 
-[node name="alex_a" parent="." instance=ExtResource("10_efxa6")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.94283, 0, 2.57332)
-script = ExtResource("11_dg77c")
+[node name="Cars-1" parent="." instance=ExtResource("7_5vw27")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.10579, -0.275088, 9.24104)
 
 [editable path="SubViewportContainer/SubViewport/Level/Cylinder/icosphere"]
