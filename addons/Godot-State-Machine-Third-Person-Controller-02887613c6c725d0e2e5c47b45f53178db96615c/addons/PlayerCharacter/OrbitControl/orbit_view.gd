@@ -70,15 +70,46 @@ func _process(delta):
 	#get pan direction
 	var joy_dir = Input.get_vector("pan_left", "pan_right", "pan_up", "pan_down")
 	
-	#position the cam according to her mode (default, aim (with left or right side))
-	if !cam_aimed: cam.position = Vector3(0.0, 0.0, zoom_val)
-	else: cam.position = Vector3(aim_cam_pos.x if aim_cam_pos_side else -aim_cam_pos.x, aim_cam_pos.y, zoom_val)
+	# First set the desired camera position based on mode
+	var desired_pos = Vector3.ZERO
+	if !cam_aimed:
+		desired_pos = Vector3(0.0, 0.0, zoom_val)
+	else:
+		desired_pos = Vector3(aim_cam_pos.x if aim_cam_pos_side else -aim_cam_pos.x, aim_cam_pos.y, zoom_val)
 	
 	#rotate cam
 	rotate_from_vector(joy_dir * Vector2(1.0, 0.5) * pan_rotation_val * delta)
 	
 	#handle zoom
 	zoom_handling(delta)
+
+	# Check for obstacles between camera and player, adjust zoom if needed
+	var from = global_transform.origin
+	var target_pos = global_transform.origin + (transform.basis * desired_pos)
+	var space_state = get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(from, target_pos)
+	# Exclude the player character from collision check
+	query.exclude = [get_parent().get_rid()]
+	var result = space_state.intersect_ray(query)
+
+	if result:
+		var hit_distance = from.distance_to(result.position)
+		# Move camera closer if obstacle detected
+		# Add a small offset to prevent clipping
+		var adjusted_distance = hit_distance - 1  # Small offset to prevent clipping
+		
+		if !cam_aimed:
+			cam.position = Vector3(0.0, 0.0, clamp(adjusted_distance, min_zoom_val, zoom_val))
+		else:
+			var ratio = adjusted_distance / desired_pos.length()
+			cam.position = desired_pos * ratio
+		
+		# # Optional: Fade out any objects between camera and player
+		# if result.collider.has_method("set_transparency"):
+		# 	result.collider.set_transparency(0.5)  # Make obstacle semi-transparent
+	else:
+		# No obstacles, use desired position
+		cam.position = desired_pos
 	
 func rotate_from_vector(vector : Vector2):
 	#rotate cam by the vector's amount, and clamp the rotation between max up and max down values
