@@ -19,49 +19,49 @@
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
 ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
 
-[sub_resource type="Sky" id="Sky_c02bc"]
+[sub_resource type="Sky" id="Sky_w48qg"]
 sky_material = SubResource("ProceduralSkyMaterial_andoa")
 
 [sub_resource type="Environment" id="Environment_j45us"]
 background_mode = 1
-sky = SubResource("Sky_c02bc")
+sky = SubResource("Sky_w48qg")
 ambient_light_source = 2
 ambient_light_color = Color(0.713726, 0.713726, 0.713726, 1)
 tonemap_mode = 2
 glow_enabled = true
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xqpyn"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vivmo"]
 albedo_color = Color(0.117647, 0.737255, 0.45098, 1)
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_1s8w4"]
-material = SubResource("StandardMaterial3D_xqpyn")
+material = SubResource("StandardMaterial3D_vivmo")
 size = Vector2(10, 10)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qp00u"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2cqfq"]
 albedo_color = Color(0.588235, 0.423529, 0.423529, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_8smba"]
-material = SubResource("StandardMaterial3D_qp00u")
+material = SubResource("StandardMaterial3D_2cqfq")
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c3sws"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yaehf"]
 diffuse_mode = 3
 albedo_color = Color(0.658824, 0.517647, 0.952941, 1)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_x030n"]
-material = SubResource("StandardMaterial3D_c3sws")
+material = SubResource("StandardMaterial3D_yaehf")
 top_radius = 0.75
 bottom_radius = 0.75
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_3v0k5"]
 albedo_color = Color(0.941176, 0.309804, 0.470588, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4irvy"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_074og"]
 albedo_color = Color(0.301961, 0.607843, 0.901961, 1)
 
 [sub_resource type="PrismMesh" id="PrismMesh_ebc50"]
-material = SubResource("StandardMaterial3D_4irvy")
+material = SubResource("StandardMaterial3D_074og")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_i6itp"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_w48qg"]
 render_priority = 0
 shader = ExtResource("3_gtvun")
 shader_parameter/depth_threshold = 0.05
@@ -70,10 +70,10 @@ shader_parameter/normal_threshold = 0.6
 shader_parameter/darken_amount = 0.2
 shader_parameter/lighten_amount = 1.5
 shader_parameter/normal_edge_bias = Vector3(-1, -1, -1)
-shader_parameter/light_direction = Vector3(0.357696, -0.440412, -0.823463)
+shader_parameter/light_direction = Vector3(0.0354862, -0.440382, 0.897109)
 
 [sub_resource type="QuadMesh" id="QuadMesh_egxnj"]
-material = SubResource("ShaderMaterial_i6itp")
+material = SubResource("ShaderMaterial_w48qg")
 flip_faces = true
 size = Vector2(2, 2)
 
@@ -117,7 +117,7 @@ mesh = SubResource("BoxMesh_8smba")
 skeleton = NodePath("../../../..")
 
 [node name="Node3D" type="Node3D" parent="SubViewportContainer/SubViewport/Level"]
-transform = Transform3D(0.903192, 0.174937, -0.351629, 0, 0.895055, 0.443336, 0.392329, -0.402712, 0.809531, 0, 10, 0)
+transform = Transform3D(-0.983876, 0.0173472, -0.0348951, 0, 0.895055, 0.443336, 0.0389184, 0.438688, -0.881836, 0, 10, 0)
 script = ExtResource("2_7luwn")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport/Level/Node3D"]
@@ -131,7 +131,7 @@ mesh = SubResource("CylinderMesh_x030n")
 surface_material_override/0 = ExtResource("3_272bh")
 
 [node name="icosphere" parent="SubViewportContainer/SubViewport/Level/Cylinder" instance=ExtResource("1_c7amy")]
-transform = Transform3D(-0.265124, 0, 0.410506, 0, 0.5, 0, -0.410506, 0, -0.265124, 0, 1.75302, 0)
+transform = Transform3D(0.0604974, 0, -0.48488, 0, 0.5, 0, 0.48488, 0, 0.0604974, 0, 1.75302, 0)
 script = ExtResource("2_7luwn")
 speed = -0.5
 

@@ -1,7 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://cla33c2qqx78a"]
+[gd_scene load_steps=13 format=3 uid="uid://cla33c2qqx78a"]
 
 [ext_resource type="PackedScene" uid="uid://bgkmxyw21pc1m" path="res://addons/Godot-State-Machine-Third-Person-Controller-02887613c6c725d0e2e5c47b45f53178db96615c/addons/PlayerCharacter/PlayerCharacterScene.tscn" id="1_6f4by"]
 [ext_resource type="Material" uid="uid://coy4nf1ts2u0q" path="res://addons/Godot-State-Machine-Third-Person-Controller-02887613c6c725d0e2e5c47b45f53178db96615c/addons/Arts/Materials/grid_mat.tres" id="2_d8mrn"]
+[ext_resource type="PackedScene" uid="uid://r0fbpgakvp8w" path="res://models/animate_man.tscn" id="2_mo4pp"]
+[ext_resource type="Script" uid="uid://cbkvhk2grxr6" path="res://scripts/animate_man.gd" id="3_eqchl"]
+[ext_resource type="PackedScene" uid="uid://gmwnyqufw2td" path="res://models/alex_a.glb" id="4_hojv1"]
+[ext_resource type="Script" uid="uid://ddxq1xkhmpb36" path="res://scripts/alex_a.gd" id="5_oypib"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_6f4by"]
 sky_horizon_color = Color(0.662243, 0.671743, 0.686743, 1)
@@ -50,7 +54,6 @@ mesh = SubResource("PlaneMesh_q3h73")
 skeleton = NodePath("../../..")
 
 [node name="CSGCombiner3D" type="CSGCombiner3D" parent="Structures"]
-material_override = ExtResource("2_d8mrn")
 use_collision = true
 collision_layer = 2
 
@@ -127,6 +130,14 @@ depth = 6.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, -6)
 polygon = PackedVector2Array(0, 0, 0, 2, 6, 0)
 depth = 6.0
+
+[node name="animate_man" parent="Structures/CSGCombiner3D" instance=ExtResource("2_mo4pp")]
+transform = Transform3D(-0.713752, 0, -0.700399, 0, 1, 0, 0.700399, 0, -0.713752, -0.104084, 2.03469, -4.55964)
+script = ExtResource("3_eqchl")
+
+[node name="alex_a" parent="Structures/CSGCombiner3D" instance=ExtResource("4_hojv1")]
+transform = Transform3D(-0.632056, 0, -0.774922, 0, 1, 0, 0.774922, 0, -0.632056, -4.23776, 1.98096, -3.98772)
+script = ExtResource("5_oypib")
 
 [node name="Player" parent="." instance=ExtResource("1_6f4by")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 6, -18)
