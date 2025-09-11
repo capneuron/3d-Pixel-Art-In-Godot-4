@@ -70,7 +70,7 @@ shader_parameter/normal_threshold = 0.6
 shader_parameter/darken_amount = 0.2
 shader_parameter/lighten_amount = 1.5
 shader_parameter/normal_edge_bias = Vector3(-1, -1, -1)
-shader_parameter/light_direction = Vector3(0.0354862, -0.440382, 0.897109)
+shader_parameter/light_direction = Vector3(0.36242, -0.440382, 0.82141)
 
 [sub_resource type="QuadMesh" id="QuadMesh_egxnj"]
 material = SubResource("ShaderMaterial_w48qg")
@@ -117,7 +117,7 @@ mesh = SubResource("BoxMesh_8smba")
 skeleton = NodePath("../../../..")
 
 [node name="Node3D" type="Node3D" parent="SubViewportContainer/SubViewport/Level"]
-transform = Transform3D(-0.983876, 0.0173472, -0.0348951, 0, 0.895055, 0.443336, 0.0389184, 0.438688, -0.881836, 0, 10, 0)
+transform = Transform3D(-0.900855, 0.177219, -0.356262, 0, 0.895055, 0.443336, 0.397473, 0.401673, -0.807421, 0, 10, 0)
 script = ExtResource("2_7luwn")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport/Level/Node3D"]
@@ -131,7 +131,7 @@ mesh = SubResource("CylinderMesh_x030n")
 surface_material_override/0 = ExtResource("3_272bh")
 
 [node name="icosphere" parent="SubViewportContainer/SubViewport/Level/Cylinder" instance=ExtResource("1_c7amy")]
-transform = Transform3D(0.0604974, 0, -0.48488, 0, 0.5, 0, 0.48488, 0, 0.0604974, 0, 1.75302, 0)
+transform = Transform3D(-0.121773, 0, -0.473222, 0, 0.5, 0, 0.473222, 0, -0.121773, 0, 1.75302, 0)
 script = ExtResource("2_7luwn")
 speed = -0.5
 
