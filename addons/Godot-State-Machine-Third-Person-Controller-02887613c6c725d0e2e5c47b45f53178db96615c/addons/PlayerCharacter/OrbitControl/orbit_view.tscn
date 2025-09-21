@@ -49,11 +49,10 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 stretch = true
-stretch_shrink = 8
 
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
 handle_input_locally = false
-size = Vector2i(240, 135)
+size = Vector2i(1920, 1080)
 render_target_update_mode = 4
 
 [node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport"]
@@ -64,6 +63,7 @@ fov = 50.0
 [node name="PostProcessing" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/Camera3D"]
 unique_name_in_owner = true
 transform = Transform3D(0.494721, -0.0118243, -0.868972, -0.230959, 0.962161, -0.144582, 0.837801, 0.272224, 0.47327, 1.1671, 2.7328, -0.394937)
+visible = false
 extra_cull_margin = 16384.0
 mesh = SubResource("QuadMesh_825fy")
 skeleton = NodePath("../..")

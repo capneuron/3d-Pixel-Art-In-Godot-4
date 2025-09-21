@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="3d Pixel Art Outlines"
-run/main_scene="uid://cla33c2qqx78a"
+run/main_scene="uid://ccn8bu53dnlpv"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
